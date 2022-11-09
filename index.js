@@ -25,7 +25,9 @@ async function dbConnect() {
   }
 dbConnect();
 
-
+/* =====================
+Service Collection Start
+========================*/
 const servicesCollection = client.db("fitiFy").collection("services");
 
 // Add Service to MongoDb Using Post Method
@@ -93,8 +95,41 @@ app.post("/add-service", async (req, res) => {
       });
     }
   });
+/* =====================
+Service Collection End
+========================*/
 
+/* =====================
+Blog Collection Start
+========================*/
+const blogCollection = client.db("fitiFy").collection("blog");
 
+  //Get Blog Data From Mongo Db And Send it To the client
+  app.get("/blogs", async (req, res) => {
+    try {
+      const cursor = blogCollection.find({});
+      const blogs = await cursor.toArray();
+  
+      res.send({
+        success: true,
+        message: "Successfully got the data",
+        data: blogs
+      });
+    } catch (error) {
+      console.log(error.name.bgRed, error.message.bold);
+      res.send({
+        success: false,
+        error: error.message,
+      });
+    }
+  });
+/* =====================
+Blog Collection End
+========================*/
+
+app.get('/', (req, res) => {
+  res.send('Car Hub server is Running Now');
+})
 
 app.listen(port, () => {
     console.log(`FitiFy Server is Running on Port:  ${port}`);
