@@ -100,6 +100,59 @@ Service Collection End
 ========================*/
 
 /* =====================
+Review Collection Start
+========================*/
+const reviewCollection = client.db("fitiFy").collection("reviews");
+app.post("/review", async (req, res) => {
+  try {
+      const result = await reviewCollection.insertOne(req.body);
+      console.log(result);
+
+      if (result.insertedId) {
+          res.send({
+          success: true,
+          message: `Successfully created the ${req.body.review_text} `,
+          });
+      } else {
+          res.send({
+          success: false,
+          error: "Couldn't Add Review",
+          });
+      }
+      } catch (error) {
+      console.log(error.name.bgRed, error.message.bold);
+      res.send({
+          success: false,
+          error: error.message,
+      });
+      }
+});
+
+//Get Review Data From Mongo Db And Send it To the client
+  app.get("/review", async (req, res) => {
+    try {
+      const cursor = reviewCollection.find({});
+      const reviews = await cursor.toArray();
+  
+      res.send({
+        success: true,
+        message: "Successfully got the data",
+        data: reviews
+      });
+    } catch (error) {
+      console.log(error.name.bgRed, error.message.bold);
+      res.send({
+        success: false,
+        error: error.message,
+      });
+    }
+  });
+/* =====================
+Review Collection End
+========================*/
+
+
+/* =====================
 Blog Collection Start
 ========================*/
 const blogCollection = client.db("fitiFy").collection("blog");
@@ -126,6 +179,7 @@ const blogCollection = client.db("fitiFy").collection("blog");
 /* =====================
 Blog Collection End
 ========================*/
+
 
 app.get('/', (req, res) => {
   res.send('Car Hub server is Running Now');
