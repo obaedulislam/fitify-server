@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const { MongoClient, ServerApiVersion } = require('mongodb');
 require('dotenv').config();
+const  ObjectId = require('mongodb').ObjectId;
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -27,7 +28,7 @@ dbConnect();
 
 const servicesCollection = client.db("fitiFy").collection("services");
 
-// endpoint
+// Add Service to MongoDb Using Post Method
 app.post("/add-service", async (req, res) => {
     try {
         const result = await servicesCollection.insertOne(req.body);
@@ -53,9 +54,48 @@ app.post("/add-service", async (req, res) => {
         }
   });
 
-app.get('/', (req, res) => {
-    res.send("FitiFy Server is Running");
-})
+  //Get Services Data From Mongo Db And Send it To the client
+  app.get("/services", async (req, res) => {
+    try {
+      const cursor = servicesCollection.find({});
+      const cursorLimit = servicesCollection.find({});
+      const services = await cursor.toArray();
+      const servicesLimit = await cursorLimit.limit(3).toArray();
+  
+      res.send({
+        success: true,
+        message: "Successfully got the data",
+        data: services,
+        dataLimit: servicesLimit
+      });
+    } catch (error) {
+      console.log(error.name.bgRed, error.message.bold);
+      res.send({
+        success: false,
+        error: error.message,
+      });
+    }
+  });
+
+  //Get Single Service Data From Mongo Db And Send it To the client
+  app.get("/service/:id", async (req, res) => {
+    try {
+      const id = req.params.id;
+      const service = await servicesCollection.findOne({ _id: ObjectId(id) });
+      res.send({
+        success: true,
+        data: service
+      });
+    } catch (error) {
+      res.send({
+        success: false,
+        error: error.message,
+      });
+    }
+  });
+
+
+
 app.listen(port, () => {
     console.log(`FitiFy Server is Running on Port:  ${port}`);
 })
