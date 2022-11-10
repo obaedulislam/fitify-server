@@ -148,7 +148,48 @@ app.post("/review", async (req, res) => {
     }
   });
 
-  //Get Review Data Using Query(Email) Mongo Db And Send it To the client
+  //Get Single Service Review Data Using Query(Email) Mongo Db And Send it To the client
+  //   app.get('/singleservicereview', async (req, res) => {
+  //     let query = {};
+  //     if(req.query.serviceId){
+  //       query ={
+  //         serviceId: req.query.serviceId
+  //       }
+  //     }
+  //     const cursor = reviewCollection.find(query);
+  //     const singleservicereview = await cursor.toArray();
+  //     console.log(singleservicereview);
+  //     res.send(singleservicereview);
+  // });
+
+
+//get the reviews for particular service from the database
+  app.get('/reviews', async (req, res) => {
+    try {
+        let query = {};
+        if (req.query.serviceId) {
+            query = {
+                serviceId: req.query.serviceId
+            }
+        }
+        const cursor = reviewCollection.find(query).sort({ _id: -1 });
+        const reviews = await cursor.toArray();
+        res.send({
+            status: true,
+            reviews: reviews,
+        })
+
+    } catch (error) {
+        console.log(error.name.bgRed, error.message.bold);
+        res.send({
+            status: false,
+            error: error.message
+        })
+    }
+  })
+
+
+  //Get My Review Data Using Query(Email) Mongo Db And Send it To the client
   app.get('/myreview', async (req, res) => {
       let query = {};
       if(req.query.email){
@@ -158,6 +199,7 @@ app.post("/review", async (req, res) => {
       }
       const cursor = reviewCollection.find(query);
       const myreviews = await cursor.toArray();
+      console.log(myreviews);
       res.send(myreviews);
   });
 
@@ -171,7 +213,7 @@ app.post("/review", async (req, res) => {
       if (!myreview?._id) {
         res.send({
           success: false,
-          error: "Product doesn't exist",
+          error: "Review doesn't exist",
         });
         return;
       }
@@ -192,6 +234,52 @@ app.post("/review", async (req, res) => {
       });
     }
   });
+
+//Get User Specific Review Data  Mongo Db And Send it To the client
+app.get('/review/:id', async (req, res) => {
+  const id = req.params.id;
+  try {
+      const review = await reviewCollection.findOne({ _id: ObjectId(id) });
+      res.send({
+          status: true,
+          review: review
+      })
+
+  } catch (error) {
+      console.log(error.name.bgRed, error, message.bold);
+      res.send({
+          status: false,
+          error: error.message
+      })
+  }
+})
+
+//Create the API with patch
+app.patch('/review/:id', async (req, res) => {
+  const id = req.params.id;
+  try {
+      const result = await reviewCollection.updateOne({ _id: ObjectId(id) }, { $set: req.body });
+      console.log(result);
+      if (result.matchedCount) {
+          res.send({
+              status: true,
+              message: `Successfully updated your review for ${req.body.serviceName}`
+          })
+      } else {
+          res.send({
+              status: false,
+              error: "Couldn't update the product"
+          })
+      }
+  } catch (error) {
+      console.log(error.name.bgRed, error.message.bold);
+      res.send({
+          status: false,
+          error: error.message
+      })
+  }
+})
+
 
 
 /* =====================
