@@ -60,7 +60,7 @@ app.post("/add-service", async (req, res) => {
   app.get("/services", async (req, res) => {
     try {
       const cursor = servicesCollection.find({});
-      const cursorLimit = servicesCollection.find({});
+      const cursorLimit = servicesCollection.find({}).sort({_id : -1});
       const services = await cursor.toArray();
       const servicesLimit = await cursorLimit.limit(3).toArray();
   
@@ -137,7 +137,7 @@ app.post("/review", async (req, res) => {
       res.send({
         success: true,
         message: "Successfully got the data",
-        data: reviews
+        data: reviews,
       });
     } catch (error) {
       console.log(error.name.bgRed, error.message.bold);
@@ -147,6 +147,34 @@ app.post("/review", async (req, res) => {
       });
     }
   });
+
+  app.get('/myreview', async (req, res) => {
+    // try {
+      let query = {};
+      if(req.query.email){
+        query ={
+          email: req.query.email
+        }
+      }
+      const cursor = reviewCollection.find(query);
+      const myreviews = await cursor.toArray();
+      res.send(myreviews);
+    //   res.send({
+    //     success: true,
+    //     message: "Successfully got the data",
+    //     myReviews: myReviews
+    //   });
+    // } catch (error) {
+    //   console.log(error.name.bgRed, error.message.bold);
+    //   res.send({
+    //     success: false,
+    //     error: error.message,
+    //   });
+    //
+   //}
+  });
+
+
 /* =====================
 Review Collection End
 ========================*/
