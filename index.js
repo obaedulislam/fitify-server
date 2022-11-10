@@ -148,8 +148,8 @@ app.post("/review", async (req, res) => {
     }
   });
 
+  //Get Review Data Using Query(Email) Mongo Db And Send it To the client
   app.get('/myreview', async (req, res) => {
-    // try {
       let query = {};
       if(req.query.email){
         query ={
@@ -159,19 +159,38 @@ app.post("/review", async (req, res) => {
       const cursor = reviewCollection.find(query);
       const myreviews = await cursor.toArray();
       res.send(myreviews);
-    //   res.send({
-    //     success: true,
-    //     message: "Successfully got the data",
-    //     myReviews: myReviews
-    //   });
-    // } catch (error) {
-    //   console.log(error.name.bgRed, error.message.bold);
-    //   res.send({
-    //     success: false,
-    //     error: error.message,
-    //   });
-    //
-   //}
+  });
+
+  //Delete User Specific Review Mongo Db And Send it To the client
+  app.delete("/myreview/:id", async (req, res) => {
+    const id= req.params.id;
+  
+    try {
+      const myreview = await reviewCollection.findOne({ _id: ObjectId(id) });
+  
+      if (!myreview?._id) {
+        res.send({
+          success: false,
+          error: "Product doesn't exist",
+        });
+        return;
+      }
+  
+      const result = await reviewCollection.deleteOne({ _id: ObjectId(id) });
+  
+      if (result.deletedCount) {
+        res.send({
+          success: true,
+          message: `Successfully deleted the ${myreview.review_text}`,
+        });
+      } else {
+      }
+    } catch (error) {
+      res.send({
+        success: false,
+        error: error.message,
+      });
+    }
   });
 
 
